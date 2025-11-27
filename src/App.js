@@ -7,18 +7,22 @@ export default function FamilyFeud() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [revealedAnswers, setRevealedAnswers] = useState([]);
   const [currentTeam, setCurrentTeam] = useState(1);
-  const [team1Score, setTeam1Score] = useState(0);
-  const [team2Score, setTeam2Score] = useState(0);
-  const [team3Score, setTeam3Score] = useState(0);
-  const [team1Strikes, setTeam1Strikes] = useState(0);
-  const [team2Strikes, setTeam2Strikes] = useState(0);
-  const [team3Strikes, setTeam3Strikes] = useState(0);
+  const [teamScores, setTeamScores] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [teamStrikes, setTeamStrikes] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [teamNames, setTeamNames] = useState(['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7']);
   const [roundPoints, setRoundPoints] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const [team1Name, setTeam1Name] = useState('Team 1');
-  const [team2Name, setTeam2Name] = useState('Team 2');
-  const [team3Name, setTeam3Name] = useState('Team 3');
   const [setupComplete, setSetupComplete] = useState(false);
+
+  const teamColors = [
+    { bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-700', textDark: 'text-red-900', btn: 'bg-red-600 hover:bg-red-700', input: 'border-red-300 focus:border-red-500' },
+    { bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-700', textDark: 'text-green-900', btn: 'bg-green-600 hover:bg-green-700', input: 'border-green-300 focus:border-green-500' },
+    { bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-700', textDark: 'text-purple-900', btn: 'bg-purple-600 hover:bg-purple-700', input: 'border-purple-300 focus:border-purple-500' },
+    { bg: 'bg-orange-100', border: 'border-orange-500', text: 'text-orange-700', textDark: 'text-orange-900', btn: 'bg-orange-600 hover:bg-orange-700', input: 'border-orange-300 focus:border-orange-500' },
+    { bg: 'bg-pink-100', border: 'border-pink-500', text: 'text-pink-700', textDark: 'text-pink-900', btn: 'bg-pink-600 hover:bg-pink-700', input: 'border-pink-300 focus:border-pink-500' },
+    { bg: 'bg-indigo-100', border: 'border-indigo-500', text: 'text-indigo-700', textDark: 'text-indigo-900', btn: 'bg-indigo-600 hover:bg-indigo-700', input: 'border-indigo-300 focus:border-indigo-500' },
+    { bg: 'bg-teal-100', border: 'border-teal-500', text: 'text-teal-700', textDark: 'text-teal-900', btn: 'bg-teal-600 hover:bg-teal-700', input: 'border-teal-300 focus:border-teal-500' }
+  ];
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -44,12 +48,8 @@ export default function FamilyFeud() {
         setQuestions(parsed);
         setCurrentQuestion(0);
         setRevealedAnswers([]);
-        setTeam1Strikes(0);
-        setTeam2Strikes(0);
-        setTeam3Strikes(0);
-        setTeam1Score(0);
-        setTeam2Score(0);
-        setTeam3Score(0);
+        setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
+        setTeamScores([0, 0, 0, 0, 0, 0, 0]);
         setRoundPoints(0);
         setCurrentTeam(1);
         setGameStarted(false);
@@ -59,13 +59,17 @@ export default function FamilyFeud() {
     });
   };
 
+  const updateTeamName = (index, name) => {
+    const newNames = [...teamNames];
+    newNames[index] = name;
+    setTeamNames(newNames);
+  };
+
   const startGame = () => {
     setSetupComplete(true);
     setGameStarted(true);
     setRevealedAnswers([]);
-    setTeam1Strikes(0);
-    setTeam2Strikes(0);
-    setTeam3Strikes(0);
+    setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
     setRoundPoints(0);
     setCurrentTeam(1);
   };
@@ -79,29 +83,21 @@ export default function FamilyFeud() {
   };
 
   const addStrike = () => {
-    if (currentTeam === 1 && team1Strikes < 5) {
-      setTeam1Strikes(team1Strikes + 1);
-    } else if (currentTeam === 2 && team2Strikes < 5) {
-      setTeam2Strikes(team2Strikes + 1);
-    } else if (currentTeam === 3 && team3Strikes < 5) {
-      setTeam3Strikes(team3Strikes + 1);
+    const newStrikes = [...teamStrikes];
+    if (newStrikes[currentTeam - 1] < 5) {
+      newStrikes[currentTeam - 1]++;
+      setTeamStrikes(newStrikes);
     }
   };
 
   const switchTeam = () => {
-    if (currentTeam === 1) setCurrentTeam(2);
-    else if (currentTeam === 2) setCurrentTeam(3);
-    else setCurrentTeam(1);
+    setCurrentTeam(currentTeam === 7 ? 1 : currentTeam + 1);
   };
 
-  const awardPoints = (team) => {
-    if (team === 1) {
-      setTeam1Score(team1Score + roundPoints);
-    } else if (team === 2) {
-      setTeam2Score(team2Score + roundPoints);
-    } else {
-      setTeam3Score(team3Score + roundPoints);
-    }
+  const awardPoints = (teamIndex) => {
+    const newScores = [...teamScores];
+    newScores[teamIndex] += roundPoints;
+    setTeamScores(newScores);
     setRoundPoints(0);
   };
 
@@ -109,9 +105,7 @@ export default function FamilyFeud() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setRevealedAnswers([]);
-      setTeam1Strikes(0);
-      setTeam2Strikes(0);
-      setTeam3Strikes(0);
+      setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
       setRoundPoints(0);
     }
   };
@@ -119,12 +113,8 @@ export default function FamilyFeud() {
   const resetGame = () => {
     setCurrentQuestion(0);
     setRevealedAnswers([]);
-    setTeam1Strikes(0);
-    setTeam2Strikes(0);
-    setTeam3Strikes(0);
-    setTeam1Score(0);
-    setTeam2Score(0);
-    setTeam3Score(0);
+    setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
+    setTeamScores([0, 0, 0, 0, 0, 0, 0]);
     setRoundPoints(0);
     setCurrentTeam(1);
     setGameStarted(false);
@@ -163,39 +153,23 @@ export default function FamilyFeud() {
   if (!gameStarted) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 flex items-center justify-center p-8">
-        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-2xl w-full">
+        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-4xl w-full">
           <h2 className="text-3xl font-bold mb-6 text-center text-blue-900">Setup Teams</h2>
-          <div className="space-y-4 mb-8">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Team 1 Name</label>
-              <input
-                type="text"
-                value={team1Name}
-                onChange={(e) => setTeam1Name(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:border-red-500 focus:outline-none text-lg"
-                placeholder="Enter Team 1 Name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Team 2 Name</label>
-              <input
-                type="text"
-                value={team2Name}
-                onChange={(e) => setTeam2Name(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none text-lg"
-                placeholder="Enter Team 2 Name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Team 3 Name</label>
-              <input
-                type="text"
-                value={team3Name}
-                onChange={(e) => setTeam3Name(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none text-lg"
-                placeholder="Enter Team 3 Name"
-              />
-            </div>
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            {teamNames.map((name, idx) => (
+              <div key={idx}>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Team {idx + 1} Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => updateTeamName(idx, e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none text-lg ${teamColors[idx].input}`}
+                  placeholder={`Enter Team ${idx + 1} Name`}
+                />
+              </div>
+            ))}
           </div>
           <div className="text-center">
             <button
@@ -213,167 +187,132 @@ export default function FamilyFeud() {
   const currentQ = questions[currentQuestion];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-6 mb-6">
-          <div className={`rounded-lg shadow-xl p-6 border-4 ${
-            currentTeam === 1 ? 'bg-red-100 border-red-500' : 'bg-white border-gray-300'
-          }`}>
-            <h3 className="text-2xl font-bold text-red-700 mb-3 text-center">{team1Name}</h3>
-            <div className="text-5xl font-bold text-center mb-4 text-red-900">{team1Score}</div>
-            <div className="flex gap-1 justify-center">
-              {[0, 1, 2, 3, 4].map(i => (
-                <div
-                  key={i}
-                  className={`w-8 h-8 rounded flex items-center justify-center border-2 ${
-                    i < team1Strikes
-                      ? 'bg-red-500 border-red-700'
-                      : 'bg-gray-200 border-gray-400'
-                  }`}
-                >
-                  {i < team1Strikes && <X className="w-6 h-6 text-white stroke-[3]" />}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+          {teamNames.map((name, idx) => {
+            const color = teamColors[idx];
+            return (
+              <div
+                key={idx}
+                className={`rounded-lg shadow-xl p-3 border-4 ${
+                  currentTeam === idx + 1 ? `${color.bg} ${color.border}` : 'bg-white border-gray-300'
+                }`}
+              >
+                <h3 className={`text-sm md:text-lg font-bold ${color.text} mb-2 text-center truncate`}>
+                  {name}
+                </h3>
+                <div className={`text-2xl md:text-4xl font-bold text-center mb-2 ${color.textDark}`}>
+                  {teamScores[idx]}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={`rounded-lg shadow-xl p-6 border-4 ${
-            currentTeam === 2 ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300'
-          }`}>
-            <h3 className="text-2xl font-bold text-green-700 mb-3 text-center">{team2Name}</h3>
-            <div className="text-5xl font-bold text-center mb-4 text-green-900">{team2Score}</div>
-            <div className="flex gap-1 justify-center">
-              {[0, 1, 2, 3, 4].map(i => (
-                <div
-                  key={i}
-                  className={`w-8 h-8 rounded flex items-center justify-center border-2 ${
-                    i < team2Strikes
-                      ? 'bg-red-500 border-red-700'
-                      : 'bg-gray-200 border-gray-400'
-                  }`}
-                >
-                  {i < team2Strikes && <X className="w-6 h-6 text-white stroke-[3]" />}
+                <div className="flex gap-1 justify-center flex-wrap">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <div
+                      key={i}
+                      className={`w-5 h-5 md:w-7 md:h-7 rounded flex items-center justify-center border-2 ${
+                        i < teamStrikes[idx]
+                          ? 'bg-red-500 border-red-700'
+                          : 'bg-gray-200 border-gray-400'
+                      }`}
+                    >
+                      {i < teamStrikes[idx] && <X className="w-4 h-4 md:w-5 md:h-5 text-white stroke-[3]" />}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
 
-          <div className={`rounded-lg shadow-xl p-6 border-4 ${
-            currentTeam === 3 ? 'bg-purple-100 border-purple-500' : 'bg-white border-gray-300'
-          }`}>
-            <h3 className="text-2xl font-bold text-purple-700 mb-3 text-center">{team3Name}</h3>
-            <div className="text-5xl font-bold text-center mb-4 text-purple-900">{team3Score}</div>
-            <div className="flex gap-1 justify-center">
-              {[0, 1, 2, 3, 4].map(i => (
-                <div
-                  key={i}
-                  className={`w-8 h-8 rounded flex items-center justify-center border-2 ${
-                    i < team3Strikes
-                      ? 'bg-red-500 border-red-700'
-                      : 'bg-gray-200 border-gray-400'
-                  }`}
-                >
-                  {i < team3Strikes && <X className="w-6 h-6 text-white stroke-[3]" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-xl p-6">
+          <div className="bg-white rounded-lg shadow-xl p-3 col-span-2 md:col-span-4 lg:col-span-8">
             <div className="text-center">
-              <span className="text-sm font-semibold text-gray-600">ROUND POINTS</span>
-              <div className="text-5xl font-bold text-yellow-600">{roundPoints}</div>
-              <div className="mt-4 text-sm font-semibold text-gray-600">
+              <span className="text-xs md:text-sm font-semibold text-gray-600">ROUND POINTS</span>
+              <div className="text-3xl md:text-5xl font-bold text-yellow-600">{roundPoints}</div>
+              <div className="mt-2 text-xs md:text-sm font-semibold text-gray-600">
                 Q {currentQuestion + 1} / {questions.length}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-blue-800 rounded-t-lg p-6 shadow-xl">
-          <h2 className="text-3xl font-bold text-center text-white uppercase">
+        <div className="bg-blue-800 rounded-t-lg p-4 md:p-6 shadow-xl">
+          <h2 className="text-xl md:text-3xl font-bold text-center text-white uppercase">
             {currentQ.question}
           </h2>
         </div>
 
-        <div className="bg-white rounded-b-lg shadow-xl p-6 mb-6">
+        <div className="bg-white rounded-b-lg shadow-xl p-4 md:p-6 mb-6">
           <div className="grid gap-3">
             {currentQ.answers.map((answer, idx) => (
               <button
                 key={idx}
                 onClick={() => revealAnswer(idx)}
                 disabled={revealedAnswers.includes(idx)}
-                className={`flex items-center justify-between p-4 rounded-lg border-4 transition text-left ${
+                className={`flex items-center justify-between p-3 md:p-4 rounded-lg border-4 transition text-left ${
                   revealedAnswers.includes(idx)
                     ? 'bg-yellow-400 border-yellow-600'
                     : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
                 }`}
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-bold text-blue-900 w-8">
+                <div className="flex items-center gap-2 md:gap-4">
+                  <span className="text-xl md:text-2xl font-bold text-blue-900 w-6 md:w-8">
                     {revealedAnswers.includes(idx) ? idx + 1 : ''}
                   </span>
-                  <span className={`text-xl font-semibold ${
+                  <span className={`text-base md:text-xl font-semibold ${
                     revealedAnswers.includes(idx) ? 'text-blue-900' : 'text-transparent'
                   }`}>
                     {revealedAnswers.includes(idx) ? answer.text.toUpperCase() : 'XXXXXXXX'}
                   </span>
                 </div>
                 {revealedAnswers.includes(idx) && (
-                  <span className="text-3xl font-bold text-blue-900">{answer.points}</span>
+                  <span className="text-2xl md:text-3xl font-bold text-blue-900">{answer.points}</span>
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-wrap gap-2 md:gap-4 justify-center mb-4">
           <button
             onClick={addStrike}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition"
+            className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 md:px-8 py-2 md:py-3 rounded-lg shadow-lg transition text-sm md:text-base"
           >
             Add Strike
           </button>
           <button
             onClick={switchTeam}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 md:px-8 py-2 md:py-3 rounded-lg shadow-lg transition text-sm md:text-base"
           >
             Switch Team
           </button>
           <button
-            onClick={() => awardPoints(1)}
-            disabled={roundPoints === 0}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition"
-          >
-            Award Team 1
-          </button>
-          <button
-            onClick={() => awardPoints(2)}
-            disabled={roundPoints === 0}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition"
-          >
-            Award Team 2
-          </button>
-          <button
-            onClick={() => awardPoints(3)}
-            disabled={roundPoints === 0}
-            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition"
-          >
-            Award Team 3
-          </button>
-          <button
             onClick={nextQuestion}
             disabled={currentQuestion >= questions.length - 1}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition"
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold px-4 md:px-8 py-2 md:py-3 rounded-lg shadow-lg transition text-sm md:text-base"
           >
             Next Question
           </button>
           <button
             onClick={resetGame}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition"
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold px-4 md:px-8 py-2 md:py-3 rounded-lg shadow-lg transition text-sm md:text-base"
           >
             New Game
           </button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
+          {teamNames.map((name, idx) => {
+            const color = teamColors[idx];
+            return (
+              <button
+                key={idx}
+                onClick={() => awardPoints(idx)}
+                disabled={roundPoints === 0}
+                className={`${color.btn} disabled:bg-gray-400 text-white font-bold px-3 md:px-4 py-2 md:py-3 rounded-lg shadow-lg transition text-xs md:text-sm truncate`}
+              >
+                Award {name}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
