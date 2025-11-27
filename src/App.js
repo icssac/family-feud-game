@@ -7,12 +7,14 @@ export default function FamilyFeud() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [revealedAnswers, setRevealedAnswers] = useState([]);
   const [currentTeam, setCurrentTeam] = useState(1);
-  const [teamScores, setTeamScores] = useState([0, 0, 0, 0, 0, 0, 0]);
-  const [teamStrikes, setTeamStrikes] = useState([0, 0, 0, 0, 0, 0, 0]);
-  const [teamNames, setTeamNames] = useState(['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7']);
+  const [numTeams, setNumTeams] = useState(3);
+  const [teamScores, setTeamScores] = useState([]);
+  const [teamStrikes, setTeamStrikes] = useState([]);
+  const [teamNames, setTeamNames] = useState([]);
   const [roundPoints, setRoundPoints] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [setupComplete, setSetupComplete] = useState(false);
+  const [teamCountSelected, setTeamCountSelected] = useState(false);
 
   const teamColors = [
     { bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-700', textDark: 'text-red-900', btn: 'bg-red-600 hover:bg-red-700', input: 'border-red-300 focus:border-red-500' },
@@ -21,7 +23,10 @@ export default function FamilyFeud() {
     { bg: 'bg-orange-100', border: 'border-orange-500', text: 'text-orange-700', textDark: 'text-orange-900', btn: 'bg-orange-600 hover:bg-orange-700', input: 'border-orange-300 focus:border-orange-500' },
     { bg: 'bg-pink-100', border: 'border-pink-500', text: 'text-pink-700', textDark: 'text-pink-900', btn: 'bg-pink-600 hover:bg-pink-700', input: 'border-pink-300 focus:border-pink-500' },
     { bg: 'bg-indigo-100', border: 'border-indigo-500', text: 'text-indigo-700', textDark: 'text-indigo-900', btn: 'bg-indigo-600 hover:bg-indigo-700', input: 'border-indigo-300 focus:border-indigo-500' },
-    { bg: 'bg-teal-100', border: 'border-teal-500', text: 'text-teal-700', textDark: 'text-teal-900', btn: 'bg-teal-600 hover:bg-teal-700', input: 'border-teal-300 focus:border-teal-500' }
+    { bg: 'bg-teal-100', border: 'border-teal-500', text: 'text-teal-700', textDark: 'text-teal-900', btn: 'bg-teal-600 hover:bg-teal-700', input: 'border-teal-300 focus:border-teal-500' },
+    { bg: 'bg-yellow-100', border: 'border-yellow-500', text: 'text-yellow-700', textDark: 'text-yellow-900', btn: 'bg-yellow-600 hover:bg-yellow-700', input: 'border-yellow-300 focus:border-yellow-500' },
+    { bg: 'bg-cyan-100', border: 'border-cyan-500', text: 'text-cyan-700', textDark: 'text-cyan-900', btn: 'bg-cyan-600 hover:bg-cyan-700', input: 'border-cyan-300 focus:border-cyan-500' },
+    { bg: 'bg-lime-100', border: 'border-lime-500', text: 'text-lime-700', textDark: 'text-lime-900', btn: 'bg-lime-600 hover:bg-lime-700', input: 'border-lime-300 focus:border-lime-500' }
   ];
 
   const handleFileUpload = (e) => {
@@ -48,15 +53,23 @@ export default function FamilyFeud() {
         setQuestions(parsed);
         setCurrentQuestion(0);
         setRevealedAnswers([]);
-        setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
-        setTeamScores([0, 0, 0, 0, 0, 0, 0]);
         setRoundPoints(0);
         setCurrentTeam(1);
         setGameStarted(false);
         setSetupComplete(false);
+        setTeamCountSelected(false);
       },
       skipEmptyLines: true
     });
+  };
+
+  const selectTeamCount = (count) => {
+    setNumTeams(count);
+    const names = Array.from({ length: count }, (_, i) => `Team ${i + 1}`);
+    setTeamNames(names);
+    setTeamScores(Array(count).fill(0));
+    setTeamStrikes(Array(count).fill(0));
+    setTeamCountSelected(true);
   };
 
   const updateTeamName = (index, name) => {
@@ -69,7 +82,7 @@ export default function FamilyFeud() {
     setSetupComplete(true);
     setGameStarted(true);
     setRevealedAnswers([]);
-    setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
+    setTeamStrikes(Array(numTeams).fill(0));
     setRoundPoints(0);
     setCurrentTeam(1);
   };
@@ -91,7 +104,7 @@ export default function FamilyFeud() {
   };
 
   const switchTeam = () => {
-    setCurrentTeam(currentTeam === 7 ? 1 : currentTeam + 1);
+    setCurrentTeam(currentTeam === numTeams ? 1 : currentTeam + 1);
   };
 
   const awardPoints = (teamIndex) => {
@@ -105,7 +118,7 @@ export default function FamilyFeud() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setRevealedAnswers([]);
-      setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
+      setTeamStrikes(Array(numTeams).fill(0));
       setRoundPoints(0);
     }
   };
@@ -113,8 +126,8 @@ export default function FamilyFeud() {
   const resetGame = () => {
     setCurrentQuestion(0);
     setRevealedAnswers([]);
-    setTeamStrikes([0, 0, 0, 0, 0, 0, 0]);
-    setTeamScores([0, 0, 0, 0, 0, 0, 0]);
+    setTeamStrikes(Array(numTeams).fill(0));
+    setTeamScores(Array(numTeams).fill(0));
     setRoundPoints(0);
     setCurrentTeam(1);
     setGameStarted(false);
@@ -150,12 +163,35 @@ export default function FamilyFeud() {
     );
   }
 
+  if (!teamCountSelected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 flex items-center justify-center p-8">
+        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-3xl w-full">
+          <h2 className="text-3xl font-bold mb-6 text-center text-blue-900">How Many Teams?</h2>
+          <p className="text-center text-gray-600 mb-8">Select the number of teams playing (2-10)</p>
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+            {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(count => (
+              <button
+                key={count}
+                onClick={() => selectTeamCount(count)}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-2xl py-8 rounded-lg shadow-lg transition transform hover:scale-105"
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!gameStarted) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 flex items-center justify-center p-8">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-4xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-blue-900">Setup Teams</h2>
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <h2 className="text-3xl font-bold mb-2 text-center text-blue-900">Setup Teams</h2>
+          <p className="text-center text-gray-600 mb-6">{numTeams} Teams Selected</p>
+          <div className="grid md:grid-cols-2 gap-4 mb-8 max-h-96 overflow-y-auto">
             {teamNames.map((name, idx) => (
               <div key={idx}>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -171,7 +207,13 @@ export default function FamilyFeud() {
               </div>
             ))}
           </div>
-          <div className="text-center">
+          <div className="text-center flex gap-4 justify-center">
+            <button
+              onClick={() => setTeamCountSelected(false)}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-lg transition"
+            >
+              Back
+            </button>
             <button
               onClick={startGame}
               className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-xl px-12 py-4 rounded-lg shadow-lg transition"
@@ -185,11 +227,13 @@ export default function FamilyFeud() {
   }
 
   const currentQ = questions[currentQuestion];
+  const gridCols = numTeams <= 4 ? 'md:grid-cols-4' : numTeams <= 6 ? 'md:grid-cols-6' : 'md:grid-cols-5';
+  const awardGridCols = numTeams <= 4 ? 'md:grid-cols-4' : numTeams <= 6 ? 'md:grid-cols-6' : 'md:grid-cols-5';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-700 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+        <div className={`grid grid-cols-2 ${gridCols} gap-3 mb-6`}>
           {teamNames.map((name, idx) => {
             const color = teamColors[idx];
             return (
@@ -223,7 +267,7 @@ export default function FamilyFeud() {
             );
           })}
 
-          <div className="bg-white rounded-lg shadow-xl p-3 col-span-2 md:col-span-4 lg:col-span-8">
+          <div className={`bg-white rounded-lg shadow-xl p-3 ${numTeams <= 3 ? 'col-span-2' : 'col-span-2 md:col-span-2'}`}>
             <div className="text-center">
               <span className="text-xs md:text-sm font-semibold text-gray-600">ROUND POINTS</span>
               <div className="text-3xl md:text-5xl font-bold text-yellow-600">{roundPoints}</div>
@@ -299,7 +343,7 @@ export default function FamilyFeud() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-3">
+        <div className={`grid grid-cols-2 ${awardGridCols} gap-2 md:gap-3`}>
           {teamNames.map((name, idx) => {
             const color = teamColors[idx];
             return (
